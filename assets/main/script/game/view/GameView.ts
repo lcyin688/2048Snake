@@ -1,5 +1,6 @@
 import { Config } from "../../../core/config/Config";
 import AssetManager from "../../../core/manager/AssetManager";
+import { GameConsts } from "../../GlobalConfig";
 import FoodMgr from "../food/FoodMgr";
 import SnakeHead from "../snake/SnakeHead";
 
@@ -30,7 +31,7 @@ export default class GameView extends cc.Component {
     start() {
         this.initFood();
         this.initSnakeHead();
-        this.initSnakeAIHead();
+        // this.initSnakeAIHead();
         this.initAddSpeedProp();
         this.initBlockmulby2Prop();
     }
@@ -172,7 +173,7 @@ export default class GameView extends cc.Component {
         AssetManager.instance.loadAsset(Config.Prefab.SnakeHead, cc.Prefab).then(prefab => {
             if (prefab) {
                 let head: cc.Node = cc.instantiate(prefab);
-                head.getComponent(cc.Collider).tag = 500;
+                head.getComponent(cc.Collider).tag = GameConsts.ItemType.player;
                 this.snakeNode.addChild(head);
                 let snakeHead = head.getComponent(SnakeHead);
                 snakeHead.setHeadId(2);
@@ -185,13 +186,13 @@ export default class GameView extends cc.Component {
         })
     }
 
-    
+
     initSnakeAIHead() {
         AssetManager.instance.loadAsset(Config.Prefab.SnakeAIHead, cc.Prefab).then(prefab => {
             for (let i = 0; i < 5; i++) {
                 if (prefab) {
                     let headAI: cc.Node = cc.instantiate(prefab);
-                    headAI.getComponent(cc.Collider).tag = 501;
+                    headAI.getComponent(cc.Collider).tag = GameConsts.ItemType.ai;
                     this.snakeAINode.addChild(headAI);
                     headAI.setPosition(cc.v2(Math.floor(this.otherRectPos[i].x), Math.floor(this.otherRectPos[i].y)));
                     cc.log("AISnake position:" + headAI.position);

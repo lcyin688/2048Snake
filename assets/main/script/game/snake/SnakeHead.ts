@@ -1,5 +1,6 @@
 import { Config } from "../../../core/config/Config";
 import AssetManager from "../../../core/manager/AssetManager";
+import { GameConsts } from "../../GlobalConfig";
 import FoodMgr from "../food/FoodMgr";
 
 const { ccclass, property } = cc._decorator;
@@ -184,7 +185,7 @@ export default class SnakeHead extends cc.Component {
         node.setParent(this.node.parent);
         let foodMgr = node.getComponent(FoodMgr);
         let foodCollider = foodMgr.getComponent(cc.Collider);
-        foodCollider.tag = foodMgr.getIdx() + 20;
+        foodCollider.tag = GameConsts.ItemType.food;
 
         if (this.snakeArray.length >= 2) {
             let idx = this.snakeArray.length - 1;
@@ -204,7 +205,7 @@ export default class SnakeHead extends cc.Component {
                     this.snakeArray.splice(idx, 1); // 从数组中删除 lastNode
 
                     let foodIdx = lastFoodMgr.getId() / lastFoodMgr.getId();
-                    let spName  = this.getIconName(foodIdx) 
+                    let spName = this.getIconName(foodIdx)
                     cc.resources.load(spName, cc.SpriteFrame, (err: Error, spriteFrame: cc.SpriteFrame) => {
                         if (err) {
                             cc.log(err);
@@ -233,17 +234,17 @@ export default class SnakeHead extends cc.Component {
                     let lastFoodMgr = lastNode.getComponent(FoodMgr);
                     let secondLastFoodMgr = secondLastNode.getComponent(FoodMgr);
 
-                    if (secondLastFoodMgr&& lastFoodMgr.getId() === secondLastFoodMgr.getId()) {
+                    if (secondLastFoodMgr && lastFoodMgr.getId() === secondLastFoodMgr.getId()) {
                         // this.removeSameFood();
                         lastFoodMgr.foodTween(secondLastFoodMgr.node.position, () => {
                             lastNode.removeFromParent();
                         })
 
                         let foodIdx = lastFoodMgr.getId() / lastFoodMgr.getId();
-                        let spName  = this.getIconName(foodIdx);
+                        let spName = this.getIconName(foodIdx);
                         cc.resources.load(spName, cc.SpriteFrame, (err: Error, spriteFrame: cc.SpriteFrame) => {
                             if (err) {
-                                cc.log( err);
+                                cc.log(err);
                                 return;
                             }
 
@@ -268,8 +269,8 @@ export default class SnakeHead extends cc.Component {
 
 
     /** 获取贴图名  */
-    private getIconName(foodIdx:number){
-        let spName  = Config.Texture.FoodSp +`icon_${foodIdx}` 
+    private getIconName(foodIdx: number) {
+        let spName = Config.Texture.FoodSp + `icon_${foodIdx}`
         return spName
     }
 

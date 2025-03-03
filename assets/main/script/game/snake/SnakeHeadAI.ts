@@ -1,3 +1,4 @@
+import { GameConsts } from "../../GlobalConfig";
 import FoodMgr from "../food/FoodMgr";
 
 const { ccclass, property } = cc._decorator;
@@ -93,7 +94,7 @@ export default class SnakeHeadAI extends cc.Component {
     eatFood(node: cc.Node) {
         let foodMgr = node.getComponent(FoodMgr);
         let foodCollider = foodMgr.getComponent(cc.Collider);
-        foodCollider.tag = foodMgr.getIdx() + 20;
+        foodCollider.tag = GameConsts.ItemType.player;
         node.setParent(this.node.parent);
         this.snakeAiArray.push(node);
     }
