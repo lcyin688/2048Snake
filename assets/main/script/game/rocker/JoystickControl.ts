@@ -1,3 +1,4 @@
+import { GameConsts } from "../../GameConsts";
 import SnakeHead from "../snake/SnakeHead";
 
 const { ccclass, property } = cc._decorator;
@@ -82,7 +83,11 @@ export default class JoystickControl extends cc.Component {
         const dir = this.joystickStick.getPosition().normalize();
         let snakeHeadComp = this.snakeHead.getComponent(SnakeHead);
         snakeHeadComp.dir = dir;
-        snakeHeadComp.setIsMove(true);
+        if (snakeHeadComp.state==GameConsts.PlayStateType.state) {
+            snakeHeadComp.setPlayState(GameConsts.PlayStateType.play);
+        }
+        snakeHeadComp.isPause =false
+       
     }
 
     private resetJoystickPosition(): void {

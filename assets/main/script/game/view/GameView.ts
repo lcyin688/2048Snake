@@ -1,7 +1,7 @@
 import { Config } from "../../../core/config/Config";
 import AssetManager from "../../../core/manager/AssetManager";
-import { GameConsts } from "../../GlobalConfig";
-import FoodMgr from "../food/FoodMgr";
+import { GameConsts } from "../../GameConsts";
+import FoodItem from "../food/FoodItem";
 import SnakeHead from "../snake/SnakeHead";
 
 const { ccclass, property } = cc._decorator;
@@ -26,14 +26,16 @@ export default class GameView extends cc.Component {
 
     private otherRectPos: cc.Vec2[] = [];
 
+    private foodNodePool: FoodItem[] = [];
+
     onLoad() { }
 
     start() {
         this.initFood();
         this.initSnakeHead();
         // this.initSnakeAIHead();
-        this.initAddSpeedProp();
-        this.initBlockmulby2Prop();
+        // this.initAddSpeedProp();
+        // this.initBlockmulby2Prop();
     }
 
     update(dt) {
@@ -53,7 +55,7 @@ export default class GameView extends cc.Component {
 
     initFood() {
         // 定义食物 ID 数组
-        const foodIds: number[] = [2, 4, 8, 16, 32, 64, 128];
+        const foodIds: number[] = [0, 1, 2, 3, 4];
         // 生成不重复的食物位置
         const foodPositions: cc.Vec2[] = this.generateRandomPositions(Config.FoodLength.numFoods);
 
@@ -65,23 +67,19 @@ export default class GameView extends cc.Component {
 
         // 循环加载食物预制件
         for (let i = 0; i < Config.FoodLength.numFoods; i++) {
-            const foodIdx = i % 7;
-            AssetManager.instance.loadAsset(Config.Prefab.Food + `food_${i % 7}`, cc.Prefab).then(prefab => {
-
+            let foodIdx = foodIds[i % foodIds.length];
+            // cc.log("initFood foodIdx  001 ==  "+foodIdx);
+            AssetManager.instance.loadAsset(Config.Prefab.FoodItem, cc.Prefab).then(prefab => {
                 if (prefab) {
                     let foodNode = cc.instantiate(prefab);
                     foodNode.setPosition(foodPositions[i]);
                     this.viewArea.addChild(foodNode);
-
-                    // 设置食物的 ID
-                    const foodId = foodIds[i % 7];
-
-                    let foodMgr: FoodMgr = foodNode.getComponent(FoodMgr);
-                    if (foodMgr) {
-                        foodMgr.setIdx(foodIdx);
-                        foodMgr.setId(foodId);
-                        foodMgr.setStr();
+                    let foodItem: FoodItem = foodNode.getComponent(FoodItem);
+                    if (foodItem) {
+                        foodItem.setFoodState(GameConsts.FoodStateType.state);
+                        foodItem.setId(foodIdx);
                     }
+                    this.foodNodePool.push(foodItem);
                 }
             }).catch(err => {
                 cc.error(err);
@@ -173,11 +171,10 @@ export default class GameView extends cc.Component {
         AssetManager.instance.loadAsset(Config.Prefab.SnakeHead, cc.Prefab).then(prefab => {
             if (prefab) {
                 let head: cc.Node = cc.instantiate(prefab);
-                head.getComponent(cc.Collider).tag = GameConsts.ItemType.player;
+                head.getComponent(cc.Collider).tag = GameConsts.ItemColliderType.player;
                 this.snakeNode.addChild(head);
                 let snakeHead = head.getComponent(SnakeHead);
-                snakeHead.setHeadId(2);
-                snakeHead.setStr();
+                snakeHead.setHeadId(0);
                 head.position = cc.v3(0, 0);
                 cc.director.emit('addHead');
             }
@@ -192,7 +189,7 @@ export default class GameView extends cc.Component {
             for (let i = 0; i < 5; i++) {
                 if (prefab) {
                     let headAI: cc.Node = cc.instantiate(prefab);
-                    headAI.getComponent(cc.Collider).tag = GameConsts.ItemType.ai;
+                    headAI.getComponent(cc.Collider).tag = GameConsts.ItemColliderType.ai;
                     this.snakeAINode.addChild(headAI);
                     headAI.setPosition(cc.v2(Math.floor(this.otherRectPos[i].x), Math.floor(this.otherRectPos[i].y)));
                     cc.log("AISnake position:" + headAI.position);

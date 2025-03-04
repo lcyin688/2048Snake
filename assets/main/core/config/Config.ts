@@ -2,7 +2,7 @@
 export namespace Config {
 
     export namespace Prefab {
-        export const Food = "prefab/food/";
+        export const FoodItem = "prefab/food/foodItem";
         export const SnakeHead = "prefab/snakeHead/head";
         export const SnakeAIHead = "prefab/snakeHead/headAI";
         export const Countdown = "prefab/countdown/countdown";
@@ -17,10 +17,6 @@ export namespace Config {
 
     export namespace Texture {
         export const FoodSp = "texture/game/item/"
-    }
-
-    export namespace Size {
-        export const FoodSize = [50, 55, 60, 65, 70, 75, 80]
     }
 
     export namespace MoveSpeed {
