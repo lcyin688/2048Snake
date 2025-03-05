@@ -11,6 +11,11 @@ export namespace GameConsts {
         wallDown = 8,
         wallLeft = 9,
         wallRight = 10,
+        /**加速道具 */
+        speedPropTag = 11,
+        /** 翻倍道具 */
+        doublePropTag = 12,
+
     }
 
     export class ItemBlockType {
@@ -20,7 +25,9 @@ export namespace GameConsts {
         colorStr:string
         foodSize:number
     }
-
+    export const overCountTime = 600
+    /** 重生复活CD */
+    export const relifeCDTime = 5
 
     export const snakeConfig = {
         [0]:{idx:0,score:2   ,spName:"icon_0"      ,colorStr:"#ff5400" ,foodSize:50},
@@ -51,6 +58,21 @@ export namespace GameConsts {
         died = 1,
         //玩家或者AI 身上的激活中
         player=2
+    }
+    /** 排行榜数据 */
+    export class ItemRank {
+        //** 玩家名字 */
+        playerName:string
+        /** 玩家积分 */
+        score:number
+        isSelf:boolean
+    }
+
+    /** 游戏中排行榜UI */
+    export class GameItemRank {
+        node:cc.Node
+        playerName:cc.Label
+        score:cc.Label
     }
 
 }

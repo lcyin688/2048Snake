@@ -1,4 +1,5 @@
 import { Config } from "../../../core/config/Config";
+import { GameConsts } from "../../GameConsts";
 import SnakeHead from "../snake/SnakeHead";
 
 const { ccclass, property } = cc._decorator;
@@ -27,14 +28,14 @@ export default class ButtonSpeedControl extends cc.Component {
     }
 
     onTouchStart(event: cc.Event.EventTouch) {
-        if (!this.snakeHead || !this.snakeHeadComp.getIsMove()) return;
-        this.snakeHeadComp.setSpeed(this.snakeHeadComp.getSpeed() + this.snakeHeadComp.getSpeed() * 0.5);
+        if (!this.snakeHead || this.snakeHeadComp.state!=GameConsts.PlayStateType.play) return;
+        this.snakeHeadComp.setSpeed( this.snakeHeadComp.getSpeed() * 1.5);
         this.node.opacity = 150;
         cc.director.emit('show countdown')
     }
 
     onTouchEnd(event: cc.Event.EventTouch) {
-        if (!this.snakeHead || !this.snakeHeadComp.getIsMove()) return;
+        if (!this.snakeHead || this.snakeHeadComp.state!=GameConsts.PlayStateType.play) return;
         this.snakeHeadComp.setSpeed(Config.MoveSpeed.Speed);
         this.node.opacity = 255;
         cc.director.emit('hide countdown')

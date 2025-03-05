@@ -17448,6 +17448,11 @@ declare namespace cc {
 			ALL_TRS = 0,
 			ALL = 0,		
 		}	
+
+
+        export function getChildByPath(arg0: string) {
+            throw new Error("Function not implemented.");
+        }
 	}
 		
 	/****************************************************

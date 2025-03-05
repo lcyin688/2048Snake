@@ -1,49 +1,66 @@
 {
   "group-list": [
     "default",
-    "food",
-    "wall",
+    "Food",
+    "Wall",
     "UI",
     "AI",
-    "Player"
+    "Player",
+    "Prop"
   ],
   "collision-matrix": [
     [
-      true,
-      null,
-      true
-    ],
-    [
-      false,
       false,
       null,
-      true
-    ],
-    [
-      true,
-      false,
-      false,
-      true
-    ],
-    [
-      false,
-      true,
-      true,
       false
     ],
     [
       false,
       false,
+      null,
       false,
-      false,
-      false
+      true,
+      true
     ],
     [
       false,
       false,
       false,
       false,
+      true,
+      true
+    ],
+    [
       false,
+      false,
+      false,
+      false
+    ],
+    [
+      false,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true
+    ],
+    [
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true
+    ],
+    [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
       false
     ]
   ],

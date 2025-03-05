@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Blockmulby2",
+    "_name": "double",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -116,7 +116,7 @@
       "__id__": 1
     },
     "_enabled": true,
-    "tag": 31,
+    "tag": 12,
     "_offset": {
       "__type__": "cc.Vec2",
       "x": -0.1,

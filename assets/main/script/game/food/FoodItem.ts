@@ -13,12 +13,14 @@ export default class FoodItem extends cc.Component {
     socreLab: cc.Label = null;
     boxCol: cc.BoxCollider = null;
     state = GameConsts.FoodStateType.state;
-
-
+    phyboxCol: cc.PhysicsBoxCollider = null;
     onLoad() { 
         this.socreLab = this.node.getChildByName('lab').getComponent(cc.Label);
         this.boxCol = this.node.getComponent(cc.BoxCollider);
-        this.setTag(GameConsts.ItemColliderType.food)
+        this.setBoxTag(GameConsts.ItemColliderType.food)
+        this.node.group = "Food"
+        this.phyboxCol = this.node.getComponent(cc.PhysicsBoxCollider);
+        this.setPhyBoxTag(GameConsts.ItemColliderType.food)
     }
 
     start() { }
@@ -83,16 +85,12 @@ export default class FoodItem extends cc.Component {
         this.node.angle = angle - 90;
     }
 
-    setTag(typ: GameConsts.ItemColliderType) {
+    public setBoxTag(typ: GameConsts.ItemColliderType) {
         this.boxCol.tag = typ
     }
 
-    public foodTween(pos: cc.Vec3, callback: Function) {
-        cc.tween(this.node)
-            .to(0.2, { position: pos })
-            .call(() => {
-                callback && callback();
-            })
-            .start();
+    public setPhyBoxTag(typ: GameConsts.ItemColliderType) {
+        this.phyboxCol.tag = typ
     }
+
 }

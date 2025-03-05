@@ -1,5 +1,6 @@
 import { AudioClipName } from "../../core/sound/AudioClipName";
 import AudioManger from "../../core/sound/AudioManger";
+import GameView from "../game/view/GameView";
 
 const { ccclass, property } = cc._decorator;
 
@@ -13,19 +14,25 @@ export default class Loading extends cc.Component {
 
     private loadingTime: number = 1;
     private countTime: number = 0;
-    private isload: boolean = true; //防止多次加载
+    private isNeedload: boolean = true; //防止多次加载
 
-    onLoad() {
+
+    onEnable() { 
+        this.loadingProessbar.node.active = true;
+        this.btnPlay.active = false;
         this.loadingProessbar.progress = 0;
+        this.countTime=0
+        this.isNeedload = true;
     }
 
-    start() { }
-
     protected update(dt: number): void {
+        if (!this.isNeedload) {
+            return
+        }
         this.countTime += dt;
         let progress = Math.ceil((this.countTime / this.loadingTime) * 100);
-        if (progress >= 100 && this.isload) {
-            this.isload = false;
+        if (progress >= 100) {
+            this.isNeedload = false;
             progress = 100;
             this.loadingProessbar.node.active = false;
             this.btnPlay.active = true;
@@ -37,5 +44,7 @@ export default class Loading extends cc.Component {
     onClickPlay() {
         AudioManger.instance.playEffect(AudioClipName.effect.click)
         this.node.active = false;
+        this.node.parent.getChildByName("GameView").active = true;
+        this.node.parent.getChildByName("GameView").getComponent(GameView).startGame()
     }
 }

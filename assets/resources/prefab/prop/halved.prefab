@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "AddSpeed",
+    "_name": "halved",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],
@@ -92,7 +92,7 @@
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
     "_spriteFrame": {
-      "__uuid__": "324d4ca0-3835-4ccb-b3ea-52f650e056c0"
+      "__uuid__": "e25645cd-51e4-4f8d-9df3-8f7238edaee0"
     },
     "_type": 0,
     "_sizeMode": 1,
@@ -116,16 +116,16 @@
       "__id__": 1
     },
     "_enabled": true,
-    "tag": 11,
+    "tag": 31,
     "_offset": {
       "__type__": "cc.Vec2",
-      "x": 0,
-      "y": 0
+      "x": -0.1,
+      "y": 0.2
     },
     "_size": {
       "__type__": "cc.Size",
-      "width": 116,
-      "height": 116
+      "width": 99.9,
+      "height": 99.1
     },
     "_id": ""
   },

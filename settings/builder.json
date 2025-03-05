@@ -1,5 +1,5 @@
 {
-  "title": "2048Snake",
+  "title": "2048 Snake Evolution",
   "packageName": "org.cocos2d.demo",
   "startScene": "ec4e4710-86eb-4e22-be0b-4de20795ad56",
   "excludeScenes": [],

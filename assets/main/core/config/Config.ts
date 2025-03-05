@@ -6,8 +6,8 @@ export namespace Config {
         export const SnakeHead = "prefab/snakeHead/head";
         export const SnakeAIHead = "prefab/snakeHead/headAI";
         export const Countdown = "prefab/countdown/countdown";
-        export const AddSpeedProp = "prefab/prop/AddSpeed";
-        export const Blockmulby2Prop = "prefab/prop/Blockmulby2";
+        export const AddSpeedProp = "prefab/prop/addSpeed";
+        export const DoubleProp = "prefab/prop/double";
     }
 
     export namespace Volume {
@@ -32,12 +32,13 @@ export namespace Config {
         export const numFoods: number = 500; // 食物数量
     }
 
-    export namespace PropSize {
-        export const AddSpeedPropWidth: number = 116;
-        export const AddSpeedPropHeight: number = 116;
-
-        export const Blockmulby2PropWidth: number = 116;
-        export const Blockmulby2PropHeight: number = 116;
+    export const PropSize ={
+        /** 加速道具 */
+        addSpeedPropSize:cc.size(116,116),
+        /** 翻倍道具 */
+        doubledPropSize:cc.size(116,116),
+        /** 减半道具 */
+        halvedPropSize:cc.size(116,116)
     }
 }
 
