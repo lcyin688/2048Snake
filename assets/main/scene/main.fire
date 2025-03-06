@@ -1987,7 +1987,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "rankLab1",
+    "_name": "rankLab",
     "_objFlags": 0,
     "_parent": {
       "__id__": 35
@@ -2473,7 +2473,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "rankLab2",
+    "_name": "rankLab",
     "_objFlags": 0,
     "_parent": {
       "__id__": 45
@@ -2959,7 +2959,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "rankLab3",
+    "_name": "rankLab",
     "_objFlags": 0,
     "_parent": {
       "__id__": 55
@@ -3445,7 +3445,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "rankLab4",
+    "_name": "rankLab",
     "_objFlags": 0,
     "_parent": {
       "__id__": 65
@@ -3931,7 +3931,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "rankLab5",
+    "_name": "rankLab",
     "_objFlags": 0,
     "_parent": {
       "__id__": 75
