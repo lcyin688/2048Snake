@@ -51,6 +51,11 @@ export default class GameView extends cc.Component {
 
     
     private overCount:cc.Label=null
+    private btnBack:cc.Node=null
+    private sound:cc.Node=null
+
+    
+
 
     private updateOverCount: Function = null;
     private overCountTime:number=0
@@ -62,16 +67,24 @@ export default class GameView extends cc.Component {
     private foodPrefab:cc.Prefab=null
     private aiPrefab:cc.Prefab=null
 
-
+    onload() {
+        this.sound.getChildByName("off").active=AudioManager.instance.MusicSource.mute
+    }
     protected onEnable(): void {
         this.btnRestartFinal.on(cc.Node.EventType.TOUCH_END, this.onClickBtnRestart, this);
         this.btnRestartLose.on(cc.Node.EventType.TOUCH_END, this.onClickBtnRestartLose, this);
         this.btnRelogin.on(cc.Node.EventType.TOUCH_END, this.onClickBtnRelogin, this);
+        this.btnBack.on(cc.Node.EventType.TOUCH_END, this.onClickBtnBack, this);
+        this.sound.on(cc.Node.EventType.TOUCH_END, this.onClickBtnSound, this);
+
+        
 
         
         cc.director.on('gameOverFinal', this.gameOverFinal, this);
         cc.director.on('gameOverLose', this.gameOverLose, this);
         cc.director.on('reflashRankData', this.reflashRankData, this);
+        cc.director.on('touchAiBody', this.touchAiBody, this);
+        cc.director.on('touchAiHead', this.touchAiHead, this);
 
         
     }
@@ -80,10 +93,15 @@ export default class GameView extends cc.Component {
         this.btnRestartFinal.off(cc.Node.EventType.TOUCH_END, this.onClickBtnRestart, this);
         this.btnRestartLose.off(cc.Node.EventType.TOUCH_END, this.onClickBtnRestartLose, this);
         this.btnRelogin.off(cc.Node.EventType.TOUCH_END, this.onClickBtnRelogin, this);
+        this.btnBack.off(cc.Node.EventType.TOUCH_END, this.onClickBtnBack, this);
+        this.sound.off(cc.Node.EventType.TOUCH_END, this.onClickBtnSound, this);
+
 
         cc.director.off('gameOverFinal', this.gameOverFinal, this);
         cc.director.off('gameOverLose', this.gameOverLose, this);
         cc.director.off('reflashRankData', this.reflashRankData, this);
+        cc.director.off('touchAiBody', this.touchAiBody, this);
+        cc.director.off('touchAiHead', this.touchAiHead, this);
         
     }
     onLoad() {
@@ -112,12 +130,16 @@ export default class GameView extends cc.Component {
         this.btnRestartLose=this.overLose.getChildByName("btnRestart")
         this.btnRelogin=this.overLose.getChildByName("btnRelogin")
         this.overCount=this.menu.getChildByName("overCount").getComponent(cc.Label)
-        
+
+        this.btnBack=this.menu.getChildByName("btnBack")
+        this.sound=this.menu.getChildByName("sound")
      }
 
 
 
     startGame(){
+        
+        AudioManager.instance.playMusic(AudioClipName.music.bgm)
         this.gameover.active =false
         this.clearAllData()
         this.initFood();
@@ -352,25 +374,24 @@ export default class GameView extends cc.Component {
             this.aiSnakeArr[i].node.active =false
         }
         for (let i = 0; i < aiCount; i++) {
+            let snakeHead :SnakeHeadAI
             if (this.aiSnakeArr.length > i) {
-                let snakeHead = this.aiSnakeArr[i]
-                snakeHead.setName("player"+(i+1))
-                snakeHead.setColliderTag(GameConsts.ItemColliderType.ai+i*10)
-                snakeHead.node.setPosition(cc.v2(Math.floor(this.otherRectPos[i].x), Math.floor(this.otherRectPos[i].y)));
-                snakeHead.startGame()
+                snakeHead = this.aiSnakeArr[i]
 
             }else{
                 let head: cc.Node = cc.instantiate(this.aiPrefab);
                 this.snakeAINode.addChild(head);
-                
                 head.setPosition(cc.v2(Math.floor(this.otherRectPos[i].x), Math.floor(this.otherRectPos[i].y)));
                 cc.log("AISnake position:" + head.position);
-                let snakeHead = head.getComponent(SnakeHeadAI);
+                snakeHead = head.getComponent(SnakeHeadAI);
                 snakeHead.initView()
-                snakeHead.setName("player"+(i+1))
-                snakeHead.setColliderTag(GameConsts.ItemColliderType.ai+i*10)
                 this.aiSnakeArr.push(snakeHead)
             }
+            snakeHead.setName("player"+(i+1))
+            snakeHead.setColliderTag(GameConsts.ItemColliderType.ai+i*10)
+            snakeHead.node.setPosition(cc.v2(Math.floor(this.otherRectPos[i].x), Math.floor(this.otherRectPos[i].y)));
+            snakeHead.startGame()
+
         }
     }
 
@@ -501,5 +522,100 @@ export default class GameView extends cc.Component {
         this.node.active = false;
         this.node.parent.getChildByName("Loading").active = true;
     }
+    private onClickBtnBack(){
+        AudioManager.instance.playEffect(AudioClipName.effect.click)
+        this.node.active = false;
+        this.node.parent.getChildByName("Loading").active = true;
+    }
+
+    private onClickBtnSound(){
+        AudioManager.instance.playEffect(AudioClipName.effect.click)
+        AudioManager.instance.toggleMusic()
+        this.sound.getChildByName("off").active=AudioManager.instance.MusicSource.mute
+    }
+    
+
+
+    /**AI 头碰到我的头 */
+    private touchAiHead(other: cc.Collider){
+        let snakHeadAI = other.node.getComponent(SnakeHeadAI);
+        if (snakHeadAI) {
+            if (this.selfSnake.configItemHead.idx >snakHeadAI.configItemHead.idx) {
+                let score = snakHeadAI.totalScore+this.selfSnake.totalScore
+                this.selfSnake.updateNowData(score)
+                snakHeadAI.beKill()
+            } else if (this.selfSnake.configItemHead.idx <snakHeadAI.configItemHead.idx) {
+                //游戏结束
+                let score = snakHeadAI.totalScore+this.selfSnake.totalScore
+                snakHeadAI.updateNowData(score)
+                this.selfSnake.beKill()
+            }
+        }
+    }
+
+    /**AI 身体 碰到我的头 */
+    private touchAiBody(other: cc.Collider){
+        if (other.tag>=GameConsts.ItemColliderType.ai) {
+            //判断是身子还是 车头 车头要咬死 屁股要吃了当前碰撞的 格子 如果是中间吃掉的要让他分离
+            let yuNum = other.tag % 10;
+            if (yuNum!=0) { //头 直接杀了吃它全部积分找出他的主人
+                let snakHeadAI = this.getAiSnakHost(other)
+                if (snakHeadAI) {
+                    let configItem = other.getComponent(FoodItem)?.configItem
+                    let idx= configItem.idx
+                    if (this.selfSnake.configItemHead.idx >idx) { 
+                        let arr=  snakHeadAI.bodyKill(other)
+                        this.createFoodItemArr(arr.slice(1))
+                        let score = configItem.score+this.selfSnake.totalScore
+                        this.selfSnake.updateNowData(score)
+                    } else if (this.selfSnake.configItemHead.idx <idx) {// 否则被他给杀死
+                        //游戏结束
+                        let score = snakHeadAI.totalScore+this.selfSnake.totalScore
+                        snakHeadAI.updateNowData(score)
+                        this.selfSnake.beKill()
+                    }
+                }
+            }
+        }
+
+    }
+
+    private createFoodItemArr(arr:FoodItem[]){
+        let canUsePool :FoodItem[]= []
+        for (let i = 0; i < this.foodNodePool.length; i++) {
+            const v = this.foodNodePool[i];
+            if (v.state==GameConsts.FoodStateType.died) {
+                canUsePool.push(v)
+            }
+        }
+        if (canUsePool.length<arr.length) {
+            for (let i = 0; i < arr.length-canUsePool.length; i++) {
+                let foodNode = cc.instantiate(this.foodPrefab);
+                this.viewArea.addChild(foodNode);
+                let foodItem: FoodItem = foodNode.getComponent(FoodItem);
+                this.foodNodePool.push(foodItem);
+                canUsePool.push(foodItem)
+            }
+        }
+        //原位置放回去
+        for (let i = 0; i < arr.length; i++) {
+            canUsePool[i].setId(arr[i].configItem.idx);
+            canUsePool[i].node.setPosition(arr[i].node.getPosition());
+            canUsePool[i].node.rotation=arr[i].node.rotation
+        }
+    }
+
+
+    private getAiSnakHost(other: cc.Collider){
+        let tagNum =other.tag- other.tag % 10;
+        for (let i = 0; i < this.aiSnakeArr.length; i++) {
+            const v = this.aiSnakeArr[i];
+            if (v.boxCol.tag==tagNum) {
+                return v
+            }
+        }
+        return null
+    }
+
 
 }

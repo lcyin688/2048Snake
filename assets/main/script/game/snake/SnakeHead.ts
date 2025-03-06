@@ -1,5 +1,7 @@
 import { Config } from "../../../core/config/Config";
 import AssetManager from "../../../core/manager/AssetManager";
+import { AudioClipName } from "../../../core/sound/AudioClipName";
+import AudioManager from "../../../core/sound/AudioManger";
 import { GameConsts } from "../../GameConsts";
 import FoodItem from "../food/FoodItem";
 import FoodMgr from "../food/FoodItem";
@@ -237,22 +239,16 @@ export default class SnakeHead extends cc.Component {
 
     /** 碰到AI */
     private collisionAiEnter(other: cc.Collider, self: cc.Collider) {
-        cc.log(`AI 触发碰撞，tag：${other.tag}`)
+        // cc.log(`AI 触发碰撞，tag：${other.tag}`)
         // 大于 100 才是AI
         if (other.tag>=GameConsts.ItemColliderType.ai) {
             //判断是身子还是 车头 车头要咬死 屁股要吃了当前碰撞的 格子 如果是中间吃掉的要让他分离
             let yuNum = other.tag % 10;
             if (yuNum==0) { //头 直接杀了吃它全部积分
-                let snakHeadAI = other.node.getComponent(SnakeHeadAI);
-                if (snakHeadAI) {
-                    let score = snakHeadAI.totalScore+this.totalScore
-                    this.updateNowData(score)
-                    snakHeadAI.beKill()
-                }
+                cc.director.emit('touchAiHead',other);
             }else{//身子
-
+                cc.director.emit('touchAiBody',other);
             }
-            
         }
     }
 
@@ -326,6 +322,7 @@ export default class SnakeHead extends cc.Component {
         if (this.isFlashing) {
             return; // 如果处于闪烁状态，不执行吃食物的逻辑
         }
+        AudioManager.instance.playEffect(AudioClipName.effect.click)
         let foodItem = other.node.getComponent(FoodItem);
         if (foodItem) {
             let id = foodItem.configItem.idx
@@ -360,7 +357,7 @@ export default class SnakeHead extends cc.Component {
         cc.director.emit('reflashRankData');
     }
 
-    private updateNowData(score:number){
+    public updateNowData(score:number){
         this.reflashScore(score)
         // 将 GameConsts.snakeConfig 转换为数组
         let snakeConfigArray = Object.values(GameConsts.snakeConfig);
@@ -414,6 +411,7 @@ export default class SnakeHead extends cc.Component {
                     foodItem.setFoodState(GameConsts.FoodStateType.playing);
                     foodItem.setId(v.idx);
                     foodItem.setGroupTag(GameConsts.snakePhyTagConfig.Group5)
+                    foodItem.setRigidBodyState(false)
                 }
                 let data = this.getEndPositionAngle(i,foodItem)
                 // cc.log(" 腺癌应该方的坐标是 data ",data)

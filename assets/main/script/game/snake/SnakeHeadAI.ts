@@ -9,6 +9,7 @@ const { ccclass, property } = cc._decorator;
 @ccclass
 export default class SnakeHeadAI extends cc.Component {
 
+
     dir: cc.Vec2 =  cc.Vec2.UP; // 初始方向为向上
     speed: number = 0;
     id: number = null;
@@ -128,6 +129,8 @@ export default class SnakeHeadAI extends cc.Component {
 
     public setSpeed(speed: number) {
         this.speed = speed*0.9
+        // //测试
+        // this.speed = 0
         // cc.log('当前移速:' + this.speed);
     }
 
@@ -163,6 +166,7 @@ export default class SnakeHeadAI extends cc.Component {
         let score = this.getTotalScore()
         this.reflashScore(score)
         this.updateSnakeDirection()
+
     }
 
     setPlayState(type: GameConsts.PlayStateType) {
@@ -320,19 +324,11 @@ export default class SnakeHeadAI extends cc.Component {
                 let score = this.getTotalScore()+foodItem.configItem.score
                 this.updateNowData(score)
             } else { //推着走
-                // this.pushFood(other.node);
+                // this.pushFood(other.node);`
             }
         }
     }
 
-    /**推着走 */
-    private pushFood(foodNode: cc.Node) {
-        // 获取食物节点的刚体组件
-        let rigidBody = foodNode.getComponent(cc.RigidBody);
-        if (rigidBody) {
-            rigidBody.linearVelocity = this.dir.mul(this.speed);
-        }
-    }
 
     private setScoreDouble(bet:number){
         let score = this.getTotalScore()*bet
@@ -344,7 +340,7 @@ export default class SnakeHeadAI extends cc.Component {
         cc.director.emit('reflashRankData');
     }
 
-    private updateNowData(score:number){
+    public updateNowData(score:number){
         this.reflashScore(score)
         // 将 GameConsts.snakeConfig 转换为数组
         let snakeConfigArray = Object.values(GameConsts.snakeConfig);
@@ -378,7 +374,7 @@ export default class SnakeHeadAI extends cc.Component {
                 let foodItem = this.snakeBodyArr[i]
                 if (foodItem.state==GameConsts.FoodStateType.died) {
                     let data = this.getEndPositionAngle(i,foodItem)
-                    // cc.log(" 腺癌应该方的坐标是 data ",data)
+                    // cc.log(" 应该方的坐标是 data ",data)
                     foodItem.node.setPosition(data.endPoint);
                     foodItem.rotateHead(data.dir)
                     // this.isPause =true
@@ -387,22 +383,23 @@ export default class SnakeHeadAI extends cc.Component {
                 foodItem.setFoodState(GameConsts.FoodStateType.playing)
                 foodItem.setId(v.idx)
                 foodItem.setGroupTag(GameConsts.snakePhyTagConfig.Group4)
+                foodItem.setBoxTag(this.boxCol.tag+1)
+                foodItem.node.name=this.playerName+"_"+v.score
             }else{ //需要新加载的时候
                 let foodNode = cc.instantiate(this.prefabItem);
                 this.snakeNode.addChild(foodNode);
                 let foodItem: FoodItem = foodNode.getComponent(FoodItem);
                 if (foodItem) {
-                    foodItem.setBoxTag(GameConsts.ItemColliderType.playerBody)
-                    foodItem.setPhyBoxTag(GameConsts.ItemColliderType.playerBody)
                     foodItem.setFoodState(GameConsts.FoodStateType.playing);
                     foodItem.setId(v.idx);
                     foodItem.setGroupTag(GameConsts.snakePhyTagConfig.Group4)
-                    foodItem.node.name=this.playerName+"_"+v.score
                 }
                 let data = this.getEndPositionAngle(i,foodItem)
-                // cc.log(" 腺癌应该方的坐标是 data ",data)
+                // cc.log(" 应该方的坐标是 data ",data)
+                foodItem.setBoxTag(this.boxCol.tag+1)
                 foodItem.node.setPosition(data.endPoint);
                 foodItem.rotateHead(data.dir)
+                foodItem.node.name=this.playerName+"_"+v.score
                 this.snakeBodyArr.push(foodItem);
                 // this.isPause =true
                 // cc.director.emit('stopControl');
@@ -453,7 +450,9 @@ export default class SnakeHeadAI extends cc.Component {
 
    public setColliderTag(tag:number){
         this.boxCol.tag = tag
-        this.phyBoxCol.tag = tag
+        if (this.phyBoxCol) {
+            this.phyBoxCol.tag = tag
+        }
     }
 
     private updateSnakeDirection() {
@@ -483,5 +482,20 @@ export default class SnakeHeadAI extends cc.Component {
         }).start() 
     }
 
+
+    public  bodyKill(other: cc.Collider) {
+        let idx= other.getComponent(FoodItem)?.configItem?.idx
+        let arr =[]
+        for (let i = 0; i < this.snakeBodyArr.length; i++) { //本身就是从大到小排列的
+            const item = this.snakeBodyArr[i];
+            if (item.state==GameConsts.FoodStateType.playing) {
+                if (idx>=item.configItem.idx) {
+                    item.setFoodState(GameConsts.FoodStateType.died)
+                    arr.push(item)
+                }
+            }
+        }
+        return arr
+    }
 
 }

@@ -14,13 +14,19 @@ export default class FoodItem extends cc.Component {
     boxCol: cc.BoxCollider = null;
     state = GameConsts.FoodStateType.state;
     phyboxCol: cc.PhysicsBoxCollider = null;
+    private rigibody:cc.RigidBody = null;
+
     onLoad() { 
         this.socreLab = this.node.getChildByName('lab').getComponent(cc.Label);
         this.boxCol = this.node.getComponent(cc.BoxCollider);
         this.setBoxTag(GameConsts.ItemColliderType.food)
+
         this.phyboxCol = this.node.getComponent(cc.PhysicsBoxCollider);
         this.setPhyBoxTag(GameConsts.ItemColliderType.food)
+
         this.setGroupTag(GameConsts.snakePhyTagConfig.Group1)
+        this.rigibody = this.node.getComponent(cc.RigidBody);
+
     }
 
     public setGroupTag(tag:string){
@@ -40,7 +46,7 @@ export default class FoodItem extends cc.Component {
     public setId(id: number) {
         this.id = id;
         this.configItem = GameConsts.snakeConfig[this.id];
-        this.node.name="food_"+this.configItem.score
+        // this.node.name="food_"+this.configItem.score
         this.setSize(this.configItem.foodSize,this.configItem.foodSize)
         this.setStr();  
         let spName =  Config.Texture.FoodSp + this.configItem.spName;
@@ -83,8 +89,8 @@ export default class FoodItem extends cc.Component {
 
 
     public rotateHead(headPos) {
-        let angle = cc.v2(1, 0).signAngle(headPos) * 180 / Math.PI;
-        this.node.angle = angle - 90;
+        let angle = cc.v2(1, 0).signAngle(headPos) * 180 / Math.PI-90;
+        this.node.angle = angle  
     }
 
     public setBoxTag(typ: GameConsts.ItemColliderType) {
@@ -92,7 +98,19 @@ export default class FoodItem extends cc.Component {
     }
 
     public setPhyBoxTag(typ: GameConsts.ItemColliderType) {
-        this.phyboxCol.tag = typ
+        if (this.phyboxCol) {
+            this.phyboxCol.tag = typ
+        }
     }
+
+    public setRigidBodyState(state:boolean) {
+        if (this.phyboxCol) {
+            this.phyboxCol.enabled =state
+        }
+        if (this.rigibody) {
+            this.rigibody.enabled =state
+        }
+    } 
+
 
 }
