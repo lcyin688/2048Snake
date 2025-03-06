@@ -46,7 +46,7 @@ export namespace GameConsts {
         foodSize:number
     }
     /**游戏倒计时 */
-    export const overCountTime = 600
+    export const overCountTime = 6
     /** 重生复活CD */
     export const relifeCDTime = 5
 
@@ -94,6 +94,8 @@ export namespace GameConsts {
         node:cc.Node
         playerName:cc.Label
         score:cc.Label
+        rank:cc.Node
+        tag:cc.Node
     }
 
 }

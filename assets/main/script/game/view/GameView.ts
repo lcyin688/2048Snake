@@ -118,7 +118,9 @@ export default class GameView extends cc.Component {
                 let item: GameConsts.GameItemRank={
                     node:nodeItem,
                     playerName:nodeItem.getChildByName("playerName").getComponent(cc.Label),
-                    score:nodeItem.getChildByName("score").getComponent(cc.Label)
+                    score:nodeItem.getChildByName("score").getComponent(cc.Label),
+                    rank:nodeItem.getChildByName("rankLab"),
+                    tag:nodeItem.getChildByName("tag")
                 }
                 this.gameRankArr.push(item);
             }
@@ -164,10 +166,7 @@ export default class GameView extends cc.Component {
             if (this.overCountTime<=0) {
                 // 关闭调度器
                 this.unschedule(this.updateOverCount);
-                // this.gameOverFinal();
-
-                //测试 模拟中途被人搞死
-                this.gameOverLose();
+                this.gameOverFinal();
             }
             this.overCountTime--;
         };
@@ -438,9 +437,15 @@ export default class GameView extends cc.Component {
             isSelf: true
         }
         this.rankData.push(selfData)
-
-
-
+        for (let i = 0; i < this.aiSnakeArr.length; i++) {
+            const v = this.aiSnakeArr[i];
+            let data: GameConsts.ItemRank = {
+                score: v.totalScore,
+                playerName: v.playerName,
+                isSelf: false
+            }
+            this.rankData.push(data)
+        }
         this.reflashRankView()
     }
 
@@ -452,6 +457,17 @@ export default class GameView extends cc.Component {
                 v.node.active=true
                 v.playerName.string=this.rankData[i].playerName
                 v.score.string=this.rankData[i].score.toString()
+                let clrTmp = cc.color(0, 0, 0);
+                v.tag.active =this.rankData[i].isSelf
+                if (this.rankData[i].isSelf) {
+                    v.playerName.node.color = clrTmp.fromHEX("#fef500")
+                    v.score.node.color = clrTmp.fromHEX("#fef500")
+                    v.rank.color = clrTmp.fromHEX("#fef500")
+                }else{
+                    v.playerName.node.color = clrTmp.fromHEX("#ffffff")
+                    v.score.node.color = clrTmp.fromHEX("#ffffff")
+                    v.rank.color = clrTmp.fromHEX("#ffffff")
+                }
             }else{
                 v.node.active=false
             }
@@ -466,17 +482,25 @@ export default class GameView extends cc.Component {
         this.overFinal.active =true
         let contentNode=this.overFinal.getChildByName("scro").getComponent(cc.ScrollView).content
         let itemNode=this.overFinal.getChildByName("rankItem")
+        itemNode.active =false
         contentNode.removeAllChildren()
         for (let i = 0; i < this.rankData.length; i++) {
             const v = this.rankData[i];
             let item = cc.instantiate(itemNode)
+            item.active =true
             item.parent =contentNode
             item.getChildByName("tag").active =v.isSelf
             let str =(i+1)+"  "+v.playerName+"    "+v.score.toString()
-            item.getChildByName("des").getComponent(cc.Label).string=str
+            let desLab = item.getChildByName("des")
+            desLab.getComponent(cc.Label).string=str
+            let clrTmp = cc.color(0, 0, 0);
             if (v.isSelf) {
                 this.overFinal.getChildByName("rankSelf").getComponent(cc.Label).string=str
+                desLab.color = clrTmp.fromHEX("#fef500")
+            }else{
+                desLab.color = clrTmp.fromHEX("#ffffff")
             }
+
         }
     }
 
