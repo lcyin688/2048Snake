@@ -18,12 +18,14 @@ export default class FoodItem extends cc.Component {
         this.socreLab = this.node.getChildByName('lab').getComponent(cc.Label);
         this.boxCol = this.node.getComponent(cc.BoxCollider);
         this.setBoxTag(GameConsts.ItemColliderType.food)
-        this.node.group = "Food"
         this.phyboxCol = this.node.getComponent(cc.PhysicsBoxCollider);
         this.setPhyBoxTag(GameConsts.ItemColliderType.food)
+        this.setGroupTag(GameConsts.snakePhyTagConfig.Group1)
     }
 
-    start() { }
+    public setGroupTag(tag:string){
+        this.node.group =tag
+    }
 
     setFoodState(type: GameConsts.FoodStateType) {
         this.state = type;

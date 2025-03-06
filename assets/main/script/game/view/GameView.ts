@@ -5,6 +5,7 @@ import AudioManager from "../../../core/sound/AudioManger";
 import { GameConsts } from "../../GameConsts";
 import FoodItem from "../food/FoodItem";
 import SnakeHead from "../snake/SnakeHead";
+import SnakeHeadAI from "../snake/SnakeHeadAI";
 
 const { ccclass, property } = cc._decorator;
 
@@ -16,9 +17,6 @@ export default class GameView extends cc.Component {
 
     @property(cc.Node)
     private menu: cc.Node = null;
-
-    @property(cc.Node)
-    private menu1: cc.Node = null;
 
     @property(cc.Node)
     private viewArea: cc.Node = null;
@@ -37,6 +35,7 @@ export default class GameView extends cc.Component {
     //排行榜数据 实时刷新
     private rankData: GameConsts.ItemRank[] = [];
     private selfSnake:SnakeHead=null
+    private aiSnakeArr:SnakeHeadAI[]=[]
 
     private addSpeedProp: cc.Node = null;
     private doubleProp: cc.Node = null;
@@ -59,6 +58,9 @@ export default class GameView extends cc.Component {
     private  isRelifeCdState:boolean=false
 
     private foodNodePool:FoodItem[]=[]
+
+    private foodPrefab:cc.Prefab=null
+    private aiPrefab:cc.Prefab=null
 
 
     protected onEnable(): void {
@@ -109,7 +111,7 @@ export default class GameView extends cc.Component {
         this.btnRestartFinal=this.overFinal.getChildByName("btnRestart")
         this.btnRestartLose=this.overLose.getChildByName("btnRestart")
         this.btnRelogin=this.overLose.getChildByName("btnRelogin")
-        this.overCount=this.menu1.getChildByName("overCount").getComponent(cc.Label)
+        this.overCount=this.menu.getChildByName("overCount").getComponent(cc.Label)
         
      }
 
@@ -117,13 +119,17 @@ export default class GameView extends cc.Component {
 
     startGame(){
         this.gameover.active =false
-
+        this.clearAllData()
         this.initFood();
         this.initSnakeHead();
-        // this.initSnakeAIHead();
+        this.initSnakeAIHead();
         this.initAddSpeedProp();
         this.initDoubleProp();
         this.setOverCountTime()
+
+    }
+
+    private clearAllData(){
 
     }
 
@@ -166,7 +172,7 @@ export default class GameView extends cc.Component {
 
         // 设置menu节点的位置为UI坐标
         this.menu.setPosition(menuPos);
-        this.menu1.setPosition(menuPos);
+
         
         if (this.gameover.active) {
             this.gameover.setPosition(menuPos);
@@ -177,7 +183,7 @@ export default class GameView extends cc.Component {
 
     initFood() {
         // 定义食物 ID 数组
-        const foodIds: number[] = [ 0,0,0,1, 2, 3, 4];
+   
         // 生成不重复的食物位置
         const foodPositions: cc.Vec2[] = this.generateRandomPositions(Config.FoodLength.numFoods);
 
@@ -186,35 +192,31 @@ export default class GameView extends cc.Component {
         for (let i = 0; i < this.otherRectPos.length; i++) {
             CC_DEBUG && cc.log(`viewArea中空余场地位置,x:${Math.floor(this.otherRectPos[i].x)},y:${Math.floor(this.otherRectPos[i].y)}`);
         }
-
-        // AssetManager.instance.loadAsset(Config.Prefab.FoodItem, cc.Prefab).then(prefab => {
-        //     if (prefab) {
-        //         let foodNode = cc.instantiate(prefab);
-        //         foodNode.setPosition( new cc.Vec2(300, 0));
-        //         this.viewArea.addChild(foodNode);
-        //         let foodItem: FoodItem = foodNode.getComponent(FoodItem);
-        //         if (foodItem) {
-        //             foodItem.setFoodState(GameConsts.FoodStateType.state);
-        //             foodItem.setId(2);
-        //         }
-        //         this.foodNodePool.push(foodItem);
-        //     }
-        // }).catch(err => {
-        //     cc.error(err);
-        // })
-
-        // 循环加载食物预制件
-        for (let i = 0; i < Config.FoodLength.numFoods; i++) {
-            let foodIdx = foodIds[i % foodIds.length];
-            // cc.log("initFood foodIdx  001 ==  "+foodIdx);
-            if (this.foodNodePool.length > i) {
-                let foodItem= this.foodNodePool[i];
-                    foodItem.setFoodState(GameConsts.FoodStateType.state);
-                    foodItem.setId(foodIdx);
-            }else{
-                AssetManager.instance.loadAsset(Config.Prefab.FoodItem, cc.Prefab).then(prefab => {
-                    if (prefab) {
-                        let foodNode = cc.instantiate(prefab);
+        if (this.foodPrefab) {
+            this.initFoodFinal(foodPositions)
+        } else {
+            AssetManager.instance.loadAsset(Config.Prefab.FoodItem, cc.Prefab).then(prefab => {
+                if (prefab) {
+                    this.foodPrefab=prefab
+                    this.initFoodFinal(foodPositions)
+                }
+            }).catch(err => {
+                cc.error(err);
+            }) 
+        }
+    }
+    private initFoodFinal(foodPositions: cc.Vec2[]){
+        const foodIds: number[] = [ 0,0,0,1, 2, 3, 4];
+                // 循环加载食物预制件
+                for (let i = 0; i < Config.FoodLength.numFoods; i++) {
+                    let foodIdx = foodIds[i % foodIds.length];
+                    // cc.log("initFood foodIdx  001 ==  "+foodIdx);
+                    if (this.foodNodePool.length > i) {
+                        let foodItem= this.foodNodePool[i];
+                            foodItem.setFoodState(GameConsts.FoodStateType.state);
+                            foodItem.setId(foodIdx);
+                    }else{
+                        let foodNode = cc.instantiate(this.foodPrefab);
                         foodNode.setPosition(foodPositions[i]);
                         this.viewArea.addChild(foodNode);
                         let foodItem: FoodItem = foodNode.getComponent(FoodItem);
@@ -224,11 +226,7 @@ export default class GameView extends cc.Component {
                         }
                         this.foodNodePool.push(foodItem);
                     }
-                }).catch(err => {
-                    cc.error(err);
-                })
-            }
-        }
+                }
     }
 
     generateRandomPositions(numPositions: number): cc.Vec2[] {
@@ -316,36 +314,64 @@ export default class GameView extends cc.Component {
             AssetManager.instance.loadAsset(Config.Prefab.SnakeHead, cc.Prefab).then(prefab => {
                 if (prefab) {
                     let head: cc.Node = cc.instantiate(prefab);
-                    head.getComponent(cc.Collider).tag = GameConsts.ItemColliderType.player;
                     this.snakeNode.addChild(head);
                     let snakeHead = head.getComponent(SnakeHead);
+                    snakeHead.initView()
                     snakeHead.setName("letsGo")
-                    // snakeHead.setHeadId(0);
-                    // head.position = cc.v3(0, 0);
+                    snakeHead.setColliderTag(GameConsts.ItemColliderType.player)
                     this.selfSnake =snakeHead
                     cc.director.emit('addHead');
                 }
             }).catch(err => {
                 cc.error(err)
             })
+        }else{
+            this.selfSnake.startGame()
         }
     }
 
 
     initSnakeAIHead() {
-        AssetManager.instance.loadAsset(Config.Prefab.SnakeAIHead, cc.Prefab).then(prefab => {
-            for (let i = 0; i < 5; i++) {
+        //随机几个Ai头
+        if (this.aiPrefab) {
+            this.initSnakAIFinal()
+        } else {
+            AssetManager.instance.loadAsset(Config.Prefab.SnakeAIHead, cc.Prefab).then(prefab => {
                 if (prefab) {
-                    let headAI: cc.Node = cc.instantiate(prefab);
-                    headAI.getComponent(cc.Collider).tag = GameConsts.ItemColliderType.ai;
-                    this.snakeAINode.addChild(headAI);
-                    headAI.setPosition(cc.v2(Math.floor(this.otherRectPos[i].x), Math.floor(this.otherRectPos[i].y)));
-                    cc.log("AISnake position:" + headAI.position);
+                    this.aiPrefab=prefab
+                    this.initSnakAIFinal()
                 }
+            }).catch(err => {
+                cc.error(err);
+            }) 
+        }
+    }
+    private initSnakAIFinal(){
+        let aiCount = Math.floor(Math.random() * 5) + 1;
+        for (let i = 0; i < this.aiSnakeArr.length; i++) {
+            this.aiSnakeArr[i].node.active =false
+        }
+        for (let i = 0; i < aiCount; i++) {
+            if (this.aiSnakeArr.length > i) {
+                let snakeHead = this.aiSnakeArr[i]
+                snakeHead.setName("player"+(i+1))
+                snakeHead.setColliderTag(GameConsts.ItemColliderType.ai+i*10)
+                snakeHead.node.setPosition(cc.v2(Math.floor(this.otherRectPos[i].x), Math.floor(this.otherRectPos[i].y)));
+                snakeHead.startGame()
+
+            }else{
+                let head: cc.Node = cc.instantiate(this.aiPrefab);
+                this.snakeAINode.addChild(head);
+                
+                head.setPosition(cc.v2(Math.floor(this.otherRectPos[i].x), Math.floor(this.otherRectPos[i].y)));
+                cc.log("AISnake position:" + head.position);
+                let snakeHead = head.getComponent(SnakeHeadAI);
+                snakeHead.initView()
+                snakeHead.setName("player"+(i+1))
+                snakeHead.setColliderTag(GameConsts.ItemColliderType.ai+i*10)
+                this.aiSnakeArr.push(snakeHead)
             }
-        }).catch(err => {
-            cc.error(err)
-        })
+        }
     }
 
     initAddSpeedProp() {

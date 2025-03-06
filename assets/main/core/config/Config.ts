@@ -3,6 +3,8 @@ export namespace Config {
 
     export namespace Prefab {
         export const FoodItem = "prefab/food/foodItem";
+        export const playerBodyItem = "prefab/food/playerBodyItem";
+        export const aiBodyItem = "prefab/food/aiBodyItem";
         export const SnakeHead = "prefab/snakeHead/head";
         export const SnakeAIHead = "prefab/snakeHead/headAI";
         export const Countdown = "prefab/countdown/countdown";

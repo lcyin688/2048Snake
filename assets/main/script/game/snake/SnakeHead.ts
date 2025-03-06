@@ -3,6 +3,7 @@ import AssetManager from "../../../core/manager/AssetManager";
 import { GameConsts } from "../../GameConsts";
 import FoodItem from "../food/FoodItem";
 import FoodMgr from "../food/FoodItem";
+import SnakeHeadAI from "./SnakeHeadAI";
 
 const { ccclass, property } = cc._decorator;
 
@@ -18,7 +19,9 @@ export default class SnakeHead extends cc.Component {
     state = GameConsts.PlayStateType.state;
     configItemHead:GameConsts.ItemBlockType = null;
     socreLab: cc.Label = null;
+
     boxCol: cc.BoxCollider = null;
+    phyBoxCol: cc.PhysicsBoxCollider = null;
 
     /**蛇身子 */
     snakeBodyArr:FoodItem[]=[]
@@ -36,10 +39,17 @@ export default class SnakeHead extends cc.Component {
 
 
     onLoad() {
-        this.socreLab = this.node.getChildByName('lab').getComponent(cc.Label);
-        this.boxCol = this.node.getComponent(cc.BoxCollider);
-        this.initCountdownNode();
-        this.node.group = "Player"
+        this.initView();
+    }
+
+    public initView(){
+        if (!this.boxCol) {
+            this.socreLab = this.node.getChildByName('lab').getComponent(cc.Label);
+            this.boxCol = this.node.getComponent(cc.BoxCollider);
+            this.phyBoxCol = this.node.getComponent(cc.PhysicsBoxCollider);
+            this.node.group =GameConsts.snakePhyTagConfig.Group5
+            this.initCountdownNode();
+        }
     }
 
     protected onEnable(): void {
@@ -61,7 +71,7 @@ export default class SnakeHead extends cc.Component {
     }
 
     start() {
-        AssetManager.instance.loadAsset(Config.Prefab.FoodItem, cc.Prefab).then(prefab => {
+        AssetManager.instance.loadAsset(Config.Prefab.playerBodyItem, cc.Prefab).then(prefab => {
             if (prefab) {
                 this.prefabItem = prefab
                 this.init();
@@ -196,8 +206,6 @@ export default class SnakeHead extends cc.Component {
         switch (other.tag) {
             case GameConsts.ItemColliderType.food:
                 this.eatFood(other);
-            case GameConsts.ItemColliderType.ai:
-                // this.eatFood(other);
                 break;
             case GameConsts.ItemColliderType.wallUp:
                 this.dir = cc.v2(0, -1);
@@ -221,10 +229,34 @@ export default class SnakeHead extends cc.Component {
             case GameConsts.ItemColliderType.doublePropTag:
                 this.getPropDouble(other);
                 break;
-            default:
+            default: // AI 吃到AI 整个AI 死亡
+                this.collisionAiEnter(other,self);
                 break;
         }
     }
+
+    /** 碰到AI */
+    private collisionAiEnter(other: cc.Collider, self: cc.Collider) {
+        cc.log(`AI 触发碰撞，tag：${other.tag}`)
+        // 大于 100 才是AI
+        if (other.tag>=GameConsts.ItemColliderType.ai) {
+            //判断是身子还是 车头 车头要咬死 屁股要吃了当前碰撞的 格子 如果是中间吃掉的要让他分离
+            let yuNum = other.tag % 10;
+            if (yuNum==0) { //头 直接杀了吃它全部积分
+                let snakHeadAI = other.node.getComponent(SnakeHeadAI);
+                if (snakHeadAI) {
+                    let score = snakHeadAI.totalScore+this.totalScore
+                    this.updateNowData(score)
+                    snakHeadAI.beKill()
+                }
+            }else{//身子
+
+            }
+            
+        }
+    }
+
+
     /**获得加速道具 */
     private getPropSpeed(other: cc.Collider) {
         other.node.active =false
@@ -236,7 +268,7 @@ export default class SnakeHead extends cc.Component {
     /**获得加速道具 */
     private getPropDouble(other: cc.Collider) {
         other.node.active =false
-        this.setScoreDouble(2)
+        this.setScoreDouble(15)
         cc.tween(this.node).delay(1).call(()=>{
             other.node.active =true
         }).start();
@@ -257,7 +289,7 @@ export default class SnakeHead extends cc.Component {
         this.node.setPosition(this.node.getPosition().add(dis));
         for (let i = 0; i < this.snakeBodyArr.length; i++) {
             let foodItem = this.snakeBodyArr[i]
-            if (foodItem.state==GameConsts.FoodStateType.player) {
+            if (foodItem.state==GameConsts.FoodStateType.playing) {
                 this.moveBodyItem(foodItem,i)
             }
         }
@@ -332,7 +364,7 @@ export default class SnakeHead extends cc.Component {
         this.reflashScore(score)
         // 将 GameConsts.snakeConfig 转换为数组
         let snakeConfigArray = Object.values(GameConsts.snakeConfig);
-        let snakeConfigArrayFinal=[]
+        let snakeConfigArrayFinal:GameConsts.ItemBlockType[]=[]
         let configItemHead:GameConsts.ItemBlockType;
         let isFirst = true
         for (let i = snakeConfigArray.length-1; i >=0; i--) {
@@ -368,8 +400,9 @@ export default class SnakeHead extends cc.Component {
                     // this.isPause =true
                     // cc.director.emit('stopControl');
                 }
-                foodItem.setFoodState(GameConsts.FoodStateType.player)
+                foodItem.setFoodState(GameConsts.FoodStateType.playing)
                 foodItem.setId(v.idx)
+                foodItem.setGroupTag(GameConsts.snakePhyTagConfig.Group5)
 
             }else{ //需要新加载的时候
                 let foodNode = cc.instantiate(this.prefabItem);
@@ -378,8 +411,9 @@ export default class SnakeHead extends cc.Component {
                 if (foodItem) {
                     foodItem.setBoxTag(GameConsts.ItemColliderType.playerBody)
                     foodItem.setPhyBoxTag(GameConsts.ItemColliderType.playerBody)
-                    foodItem.setFoodState(GameConsts.FoodStateType.player);
+                    foodItem.setFoodState(GameConsts.FoodStateType.playing);
                     foodItem.setId(v.idx);
+                    foodItem.setGroupTag(GameConsts.snakePhyTagConfig.Group5)
                 }
                 let data = this.getEndPositionAngle(i,foodItem)
                 // cc.log(" 腺癌应该方的坐标是 data ",data)
@@ -402,9 +436,13 @@ export default class SnakeHead extends cc.Component {
 
     private getTotalScore(){
         //计算出 最新的数据 分别 裁切
+        if (this.state==GameConsts.PlayStateType.died) {//死了后统统清0
+            return 0
+        }
+        //计算出 最新的数据 分别 裁切
         let totalScore = this.configItemHead.score
         for (let i = 0; i < this.snakeBodyArr.length; i++) {
-            if (this.snakeBodyArr[i].state==GameConsts.FoodStateType.player) {
+            if (this.snakeBodyArr[i].state==GameConsts.FoodStateType.playing) {
                 const score = this.snakeBodyArr[i].configItem.score;
                 totalScore+=score
             }
@@ -429,5 +467,24 @@ export default class SnakeHead extends cc.Component {
         const dir =endPoint.sub(pos).normalize()
         return {endPoint:endPoint,dir:dir}
    }
+
+   public setColliderTag(tag:number){
+        this.boxCol.tag = tag
+        this.phyBoxCol.tag = tag
+   }
+
+    /**嘎了 */
+    public beKill() {
+        this.isPause = true
+        this.node.stopAllActions()
+        this.reflashScore(0)
+        cc.director.emit('gameOverFinal');
+        this.state = GameConsts.PlayStateType.died;
+        for (let i = 0; i < this.snakeBodyArr.length; i++) {
+            const v = this.snakeBodyArr[i];
+            v.setFoodState(GameConsts.FoodStateType.died)
+
+        }
+    }
 
 }

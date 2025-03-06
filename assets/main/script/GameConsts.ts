@@ -1,9 +1,26 @@
 export namespace GameConsts {
+
+    export const snakePhyTagConfig = {
+        /** 默认 */
+        Group0:"default",
+        /** 食物 */
+        Group1:"Food",
+        /** 墙 */
+        Group2:"Wall",
+        /**UI */
+        Group3:"UI",
+        /**AI */
+        Group4:"AI",
+        /**玩家 */
+        Group5:"Player",
+        /**道具 */
+        Group6:"Prop",
+    }
+
     //碰撞类型
     export enum ItemColliderType {
         ui = 0,
         food = 1,
-        ai = 2,
         player = 3,
         playerBody = 4,
         
@@ -16,6 +33,9 @@ export namespace GameConsts {
         /** 翻倍道具 */
         doublePropTag = 12,
 
+        /**大于100的全是AI 每个单独的AI 多加10 AI 的身子 单独+1 */
+        ai = 100,
+
     }
 
     export class ItemBlockType {
@@ -25,6 +45,7 @@ export namespace GameConsts {
         colorStr:string
         foodSize:number
     }
+    /**游戏倒计时 */
     export const overCountTime = 600
     /** 重生复活CD */
     export const relifeCDTime = 5
@@ -57,7 +78,7 @@ export namespace GameConsts {
         state = 0,
         died = 1,
         //玩家或者AI 身上的激活中
-        player=2
+        playing=2
     }
     /** 排行榜数据 */
     export class ItemRank {
