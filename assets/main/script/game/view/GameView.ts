@@ -161,11 +161,15 @@ export default class GameView extends cc.Component {
     private setOverCountTime() {
         this.overCountTime = GameConsts.overCountTime
         this.overCount.string = this.getTimeStr(this.overCountTime);
+        if (this.updateOverCount) {
+            this.unschedule(this.updateOverCount);
+        }
         this.updateOverCount = () => {
             this.overCount.string = this.getTimeStr(this.overCountTime);
             if (this.overCountTime <= 0) {
                 // 关闭调度器
                 this.unschedule(this.updateOverCount);
+                this.updateOverCount =null
                 this.gameOverFinal();
             }
             this.overCountTime--;
@@ -446,6 +450,9 @@ export default class GameView extends cc.Component {
             }
             this.rankData.push(data)
         }
+        this.rankData.sort((a, b) => {
+            return b.score - a.score
+        })
         this.reflashRankView()
     }
 
@@ -529,8 +536,17 @@ export default class GameView extends cc.Component {
     private onClickBtnRestart() {
         AudioManager.instance.playEffect(AudioClipName.effect.click)
         this.gameover.active = false
+        this.resetAi()
         this.selfSnake.startGame()
         this.setOverCountTime()
+    }
+
+    /** I 数据清0 */
+    private resetAi(){
+        for (let i = 0; i < this.aiSnakeArr.length; i++) {
+            const v = this.aiSnakeArr[i];
+            v.startGame()
+        }
     }
 
     private onClickBtnRestartLose() {

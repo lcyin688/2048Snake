@@ -143,16 +143,17 @@ export default class SnakeHead extends cc.Component {
     init() {
         // 确保 snakeArray 包含蛇头节点
         this.snakeNode = this.node.parent
+        this.snakeBodyArr = [];
         this.startGame()
     }
 
 
     startGame() {
         this.isPause = false
+        this.resetSnakeBody()
         this.setHeadId(0);
         this.node.position = cc.v3(0, 0);
         this.dir = null;
-        this.snakeBodyArr = [];
         this.setSpeed(Config.MoveSpeed.Speed);
         this.setPlayState(GameConsts.PlayStateType.state)
         //进入游戏玩家需要闪烁两秒，在闪烁其间玩家可以移动，但是不能吃掉其他方块
@@ -167,6 +168,15 @@ export default class SnakeHead extends cc.Component {
             .start();
         let score = this.getTotalScore()
         this.reflashScore(score)
+    }
+
+    private resetSnakeBody(){
+        for (let i = 0; i < this.snakeBodyArr.length; i++) { //本身就是从大到小排列的
+            const item = this.snakeBodyArr[i];
+            if (item.state!=GameConsts.FoodStateType.died) {
+                item.setFoodState(GameConsts.FoodStateType.died)
+            }
+        }
     }
 
     setPlayState(type: GameConsts.PlayStateType) {
@@ -379,12 +389,6 @@ export default class SnakeHead extends cc.Component {
         }
         //最大的永远是身子
         this.setHeadId(configItemHead.idx)
-        //如果身子已经是 1024 那就游戏结束
-        if (configItemHead.idx == 9) {
-            this.isPause = true
-            cc.director.emit('gameOverFinal');
-            return
-        }
         for (let i = 0; i < snakeConfigArrayFinal.length; i++) {
             const v = snakeConfigArrayFinal[i];
             if (this.snakeBodyArr.length > i) {
@@ -430,6 +434,12 @@ export default class SnakeHead extends cc.Component {
             }
 
         }
+        //如果身子已经是 1024 那就游戏结束
+        if (configItemHead.idx == 9) {
+            this.isPause = true
+            cc.director.emit('gameOverFinal');
+        }
+
     }
 
     private getTotalScore() {
