@@ -2,6 +2,7 @@ import { Config } from "../../../core/config/Config";
 import AssetManager from "../../../core/manager/AssetManager";
 import { AudioClipName } from "../../../core/sound/AudioClipName";
 import AudioManager from "../../../core/sound/AudioManger";
+import CameraFollow from "../../CameraFollow";
 import { GameConsts } from "../../GameConsts";
 import FoodItem from "../food/FoodItem";
 import SnakeHead from "../snake/SnakeHead";
@@ -13,7 +14,7 @@ const { ccclass, property } = cc._decorator;
 export default class GameView extends cc.Component {
 
     @property(cc.Camera)
-    private camera: cc.Camera = null;
+    public camera: cc.Camera = null;
 
     @property(cc.Node)
     private menu: cc.Node = null;
@@ -71,6 +72,7 @@ export default class GameView extends cc.Component {
         this.sound.getChildByName("off").active = AudioManager.instance.MusicSource.mute
     }
     protected onEnable(): void {
+        this.camera.node.getComponent(CameraFollow).enabled =true 
         this.btnRestartFinal.on(cc.Node.EventType.TOUCH_END, this.onClickBtnRestart, this);
         this.btnRestartLose.on(cc.Node.EventType.TOUCH_END, this.onClickBtnRestartLose, this);
         this.btnRelogin.on(cc.Node.EventType.TOUCH_END, this.onClickBtnRelogin, this);
@@ -90,6 +92,7 @@ export default class GameView extends cc.Component {
     }
 
     protected onDisable(): void {
+        this.camera.node.getComponent(CameraFollow).enabled =false
         this.btnRestartFinal.off(cc.Node.EventType.TOUCH_END, this.onClickBtnRestart, this);
         this.btnRestartLose.off(cc.Node.EventType.TOUCH_END, this.onClickBtnRestartLose, this);
         this.btnRelogin.off(cc.Node.EventType.TOUCH_END, this.onClickBtnRelogin, this);
@@ -141,6 +144,7 @@ export default class GameView extends cc.Component {
 
 
     startGame() {
+        this.camera.node.getComponent(CameraFollow).enabled =true 
         AudioManager.instance.playMusic(AudioClipName.music.bgm)
         this.gameover.active = false
         this.clearAllData()
@@ -196,8 +200,6 @@ export default class GameView extends cc.Component {
 
         // 设置menu节点的位置为UI坐标
         this.menu.setPosition(menuPos);
-
-
         if (this.gameover.active) {
             this.gameover.setPosition(menuPos);
         }
