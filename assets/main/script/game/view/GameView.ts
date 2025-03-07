@@ -141,7 +141,6 @@ export default class GameView extends cc.Component {
 
 
     startGame() {
-
         AudioManager.instance.playMusic(AudioClipName.music.bgm)
         this.gameover.active = false
         this.clearAllData()
@@ -151,11 +150,11 @@ export default class GameView extends cc.Component {
         this.initAddSpeedProp();
         this.initDoubleProp();
         this.setOverCountTime()
-
+        cc.director.emit('stopControl');
     }
 
     private clearAllData() {
-
+        this.resetAi()
     }
 
     private setOverCountTime() {
@@ -535,10 +534,7 @@ export default class GameView extends cc.Component {
     /** 重新开始游戏 */
     private onClickBtnRestart() {
         AudioManager.instance.playEffect(AudioClipName.effect.click)
-        this.gameover.active = false
-        this.resetAi()
-        this.selfSnake.startGame()
-        this.setOverCountTime()
+        this.startGame()
     }
 
     /** I 数据清0 */

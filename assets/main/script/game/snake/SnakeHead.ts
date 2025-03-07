@@ -486,7 +486,7 @@ export default class SnakeHead extends cc.Component {
         this.isPause = true
         this.node.stopAllActions()
         this.reflashScore(0)
-        cc.director.emit('gameOverFinal');
+        cc.director.emit('gameOverLose');
         this.state = GameConsts.PlayStateType.died;
         for (let i = 0; i < this.snakeBodyArr.length; i++) {
             const v = this.snakeBodyArr[i];

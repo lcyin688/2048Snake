@@ -222,19 +222,15 @@ export default class SnakeHeadAI extends cc.Component {
                 break;
             case GameConsts.ItemColliderType.wallUp:
                 this.dir = cc.v2(0, -1);
-                cc.director.emit('stopControl');
                 break;
             case GameConsts.ItemColliderType.wallDown:
                 this.dir = cc.v2(0, 1);
-                cc.director.emit('stopControl');
                 break;
             case GameConsts.ItemColliderType.wallLeft:
                 this.dir = cc.v2(1, 0);
-                cc.director.emit('stopControl');
                 break;
             case GameConsts.ItemColliderType.wallRight:
                 this.dir = cc.v2(-1, 0);
-                cc.director.emit('stopControl');
                 break;
             case GameConsts.ItemColliderType.speedPropTag:
                 this.getPropSpeed(other);
