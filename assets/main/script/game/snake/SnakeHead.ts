@@ -315,10 +315,14 @@ export default class SnakeHead extends cc.Component {
         //知道终点和现在的位置去算矢量
         let posNow = foodItem.node.getPosition().clone()
         //当前矢量
-
-
         let normalizedVector: cc.Vec2 = endPoint.sub(posNow).normalize();
-        let moveV2 = normalizedVector.mul(this.speed);
+        let nowDis = endPoint.sub(posNow).mag()
+        let speed=this.speed
+        if (nowDis >this.speed*1.1) { // 如果距离大于标准距离，走多一点 追上他
+            speed=speed*1.1
+        }
+        let moveV2 = normalizedVector.mul(speed);
+
         let endPosFianal = posNow.add(moveV2);
         foodItem.node.setPosition(endPosFianal);
         foodItem.rotateHead(normalizedVector)
